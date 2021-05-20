@@ -1,0 +1,2 @@
+experiment_id	data_path_10x_format	ncells_expected	ndroplets_include_cellbender
+OTARscRNA9294492	/lustre/scratch119/humgen/projects/sc-eqtl-ibd/data/scrna_cellranger/results/iget_cellranger/full_data/ti/healthy/OTARscRNA9294492/raw_feature_bc_matrix	NA	NA
