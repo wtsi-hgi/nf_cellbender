@@ -1,2 +1,3 @@
 # nf_cellbender
-Single cell Nextflow cellbender pipeline.
+
+single cell Nextflow cellbender pipeline.
