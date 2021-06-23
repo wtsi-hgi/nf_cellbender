@@ -129,29 +129,6 @@ process cellbender__rb__get_input_cells {
         mv *png plots/ 2>/dev/null || true
         """
 }
-//        python ${projectDir}/bin/015-get_estimates_from_umi_counts.py \\
-//            --tenxdata_path txd_input \\
-//            --output_file ${outfile} \\
-//            --expected_nemptydroplets_umi_cutoff \\
-//                '${estimate_params_umis.expected_nemptydroplets_umi_cutoff}' \\
-//            --method_estimate_ncells \\
-//                '${estimate_params_umis.method_estimate_ncells}' \\
-//            --lower_bound_umis_estimate_ncells \\
-//                '${estimate_params_umis.lower_bound_umis_estimate_ncells}' \\
-//            --method_estimate_nemptydroplets \\
-//                '${estimate_params_umis.method_estimate_nemptydroplets}' \\
-//            --lower_bound_umis_estimate_nemptydroplets \\
-//                '${estimate_params_umis.lower_bound_umis_estimate_nemptydroplets}' \\
-//            --upper_bound_umis_estimate_nemptydroplets \\
-//                '${estimate_params_umis.upper_bound_umis_estimate_nemptydroplets}' \\
-//            --estimate_nemptydroplets_add_umifactor \\
-//                '${estimate_params_umis.estimate_nemptydroplets_umi_add_factor}' \\
-//            --estimate_nemptydroplets_subtract_dropletfactor \\
-//                '${estimate_params_umis.estimate_nemptydroplets_subtract_cell_factor}' \\
-//            --estimate_nemptydroplets_min_nemptydroplets '${estimate_params_umis.estimate_nemptydroplets_min_drop}'
-
-                //${estimate_params_umis.estimate_nemptydroplets_min_drop} ${cmd__expected_ncells} ${cmd__droplets_include}
-
 
 process cellbender__remove_background {
     // Remove ambient RNA
