@@ -99,35 +99,58 @@ process cellbender__rb__get_input_cells {
         ln --physical ${file_10x_barcodes} txd_input/barcodes.tsv.gz
         ln --physical ${file_10x_features} txd_input/features.tsv.gz
         ln --physical ${file_10x_matrix} txd_input/matrix.mtx.gz
-        015-get_estimates_from_umi_counts.py \
-            --tenxdata_path txd_input \
-            --output_file ${outfile} \
-            --expected_nemptydroplets_umi_cutoff \
-                ${estimate_params_umis.expected_nemptydroplets_umi_cutoff} \
-            --method_estimate_ncells \
-                ${estimate_params_umis.method_estimate_ncells} \
-            --lower_bound_umis_estimate_ncells \
-                ${estimate_params_umis.lower_bound_umis_estimate_ncells} \
-            --method_estimate_nemptydroplets \
-                ${estimate_params_umis.method_estimate_nemptydroplets} \
-            --lower_bound_umis_estimate_nemptydroplets \
-                ${estimate_params_umis.lower_bound_umis_estimate_nemptydroplets} \
-            --upper_bound_umis_estimate_nemptydroplets \
-                ${estimate_params_umis.upper_bound_umis_estimate_nemptydroplets} \
-            --estimate_nemptydroplets_add_umifactor \
-                ${estimate_params_umis.estimate_nemptydroplets_umi_add_factor} \
-            --estimate_nemptydroplets_subtract_dropletfactor \
-                ${estimate_params_umis.estimate_nemptydroplets_subtract_cell_factor} \
-            --estimate_nemptydroplets_min_nemptydroplets \
-                ${estimate_params_umis.estimate_nemptydroplets_min_drop} \
-            ${cmd__expected_ncells} \
-            ${cmd__droplets_include}
+
+        python ${projectDir}/bin/015-get_estimates_from_umi_counts.py \\
+            --tenxdata_path txd_input \\
+            --output_file ${outfile} \\
+            --expected_nemptydroplets_umi_cutoff \\
+                ${estimate_params_umis.expected_nemptydroplets_umi_cutoff} \\
+            --method_estimate_ncells \\
+                ${estimate_params_umis.method_estimate_ncells} \\
+            --lower_bound_umis_estimate_ncells \\
+                ${estimate_params_umis.lower_bound_umis_estimate_ncells} \\
+            --method_estimate_nemptydroplets \\
+                ${estimate_params_umis.method_estimate_nemptydroplets} \\
+            --lower_bound_umis_estimate_nemptydroplets \\
+                ${estimate_params_umis.lower_bound_umis_estimate_nemptydroplets} \\
+            --upper_bound_umis_estimate_nemptydroplets \\
+                ${estimate_params_umis.upper_bound_umis_estimate_nemptydroplets} \\
+            --estimate_nemptydroplets_add_umifactor \\
+                ${estimate_params_umis.estimate_nemptydroplets_umi_add_factor} \\
+            --estimate_nemptydroplets_subtract_dropletfactor \\
+                ${estimate_params_umis.estimate_nemptydroplets_subtract_cell_factor} \\
+            --estimate_nemptydroplets_min_nemptydroplets \\
+                ${estimate_params_umis.estimate_nemptydroplets_min_drop} \\
+                ${cmd__expected_ncells} ${cmd__droplets_include}
+
         # Clean up plots
         mkdir plots
         mv *pdf plots/ 2>/dev/null || true
         mv *png plots/ 2>/dev/null || true
         """
 }
+//        python ${projectDir}/bin/015-get_estimates_from_umi_counts.py \\
+//            --tenxdata_path txd_input \\
+//            --output_file ${outfile} \\
+//            --expected_nemptydroplets_umi_cutoff \\
+//                '${estimate_params_umis.expected_nemptydroplets_umi_cutoff}' \\
+//            --method_estimate_ncells \\
+//                '${estimate_params_umis.method_estimate_ncells}' \\
+//            --lower_bound_umis_estimate_ncells \\
+//                '${estimate_params_umis.lower_bound_umis_estimate_ncells}' \\
+//            --method_estimate_nemptydroplets \\
+//                '${estimate_params_umis.method_estimate_nemptydroplets}' \\
+//            --lower_bound_umis_estimate_nemptydroplets \\
+//                '${estimate_params_umis.lower_bound_umis_estimate_nemptydroplets}' \\
+//            --upper_bound_umis_estimate_nemptydroplets \\
+//                '${estimate_params_umis.upper_bound_umis_estimate_nemptydroplets}' \\
+//            --estimate_nemptydroplets_add_umifactor \\
+//                '${estimate_params_umis.estimate_nemptydroplets_umi_add_factor}' \\
+//            --estimate_nemptydroplets_subtract_dropletfactor \\
+//                '${estimate_params_umis.estimate_nemptydroplets_subtract_cell_factor}' \\
+//            --estimate_nemptydroplets_min_nemptydroplets '${estimate_params_umis.estimate_nemptydroplets_min_drop}'
+
+                //${estimate_params_umis.estimate_nemptydroplets_min_drop} ${cmd__expected_ncells} ${cmd__droplets_include}
 
 
 process cellbender__remove_background {
@@ -241,18 +264,18 @@ process cellbender__remove_background {
         ln --physical ${file_10x_features} txd_input/features.tsv.gz
         ln --physical ${file_10x_matrix} txd_input/matrix.mtx.gz
         # Run cellbender
-        cellbender remove-background \
-            --input txd_input \
-            --output ${outfile} \
-            --cuda \
-            --expected-cells \$(cat ${expected_cells}) \
-            --total-droplets-included \$(cat ${total_droplets_include}) \
-            --model full \
-            --z-dim ${zdims} \
-            --z-layers ${zlayers} \
-            --low-count-threshold ${low_count_threshold} \
-            --epochs ${epochs} \
-            --learning-rate ${learning_rate} \
+        cellbender remove-background \\
+            --input txd_input \\
+            --output ${outfile} \\
+            --cuda \\
+            --expected-cells \$(cat ${expected_cells}) \\
+            --total-droplets-included \$(cat ${total_droplets_include}) \\
+            --model full \\
+            --z-dim ${zdims} \\
+            --z-layers ${zlayers} \\
+            --low-count-threshold ${low_count_threshold} \\
+            --epochs ${epochs} \\
+            --learning-rate ${learning_rate} \\
             --fpr ${fpr}
         # If outfile does not have h5 appended to it, move it.
         [ -f ${outfile} ] && mv ${outfile} ${outfile}.h5
@@ -269,16 +292,16 @@ process cellbender__remove_background {
         # Make a table of cellbender output matricies in reference to their
         # final outdir... this will be used to make a group of files
         # for input
-        032-clean_cellbender_results.py \
-            --nf_outdir_tag ${outdir} \
-            --cb_outfile_tag ${outfile} \
-            --experiment_id ${experiment_id} \
-            --fpr '${fpr}' \
+        032-clean_cellbender_results.py \\
+            --nf_outdir_tag ${outdir} \\
+            --cb_outfile_tag ${outfile} \\
+            --experiment_id ${experiment_id} \\
+            --fpr '${fpr}' \\
             --cb_params ${cb_params}
         # Move the list of output matricies to one with a unique job id so
         # that we can collect them all later in the pipeline across all job
         # iterations and not overwrite anything.
-        cp ${outfile}-filtered_10x_mtx-file_list.tsv \
+        cp ${outfile}-filtered_10x_mtx-file_list.tsv \\
             ${runid}-${outfile}-filtered_10x_mtx-file_list.tsv
         # Move plots to a plot dir
         mkdir plots
@@ -345,10 +368,10 @@ process cellbender__remove_background__qc_plots {
         for i in \$(cat files.txt); do
             echo \$i
             out_file=\$(echo \$i | sed s/".h5"//)
-            035-analyse_cellbender_results.py \
-                --tenxdata_path txd_input \
-                --h5_cellbender \$i \
-                --output_file cellbender_results-\$out_file \
+            035-analyse_cellbender_results.py \\
+                --tenxdata_path txd_input \\
+                --h5_cellbender \$i \\
+                --output_file cellbender_results-\$out_file \\
                 --number_cpu ${task.cpus}
         done
         rm files.txt
@@ -391,7 +414,7 @@ process cellbender__gather_qc_input {
         echo "cellbender__gather_qc_input: ${process_info}"
         echo "outdir: ${outdir}"
         echo "results paths: ${cb_results_tsvs}"
-        045-prepare_nf_qc_cluster_input.py \
+        045-prepare_nf_qc_cluster_input.py \\
             --cb_results_tsvs ${cb_results_tsvs}
         """
 }
