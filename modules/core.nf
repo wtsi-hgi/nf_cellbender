@@ -287,7 +287,6 @@ process cellbender__remove_background {
         """
 }
 
-
 process cellbender__remove_background__qc_plots {
     // QC plots from cellbdender
     // ------------------------------------------------------------------------
@@ -357,6 +356,46 @@ process cellbender__remove_background__qc_plots {
         mv *png plots/ 2>/dev/null || true
         """
 }
+
+process cellbender__remove_background__qc_plots_2 {
+    // second set of QC plots from cellbdender
+    // ------------------------------------------------------------------------
+    //tag { output_dir }
+    //cache false        // cache results from run
+    //maxForks 2         // hard to control memory usage. limit to 3 concurrent
+    scratch false        // use tmp directory
+    echo echo_mode       // echo output from script
+    input:
+        val(outdir_prev)
+        path(cellbender_FPR_0ptnn_unfiltered_h5s) // e.g. _0pt1, _0pt05, _0pt01
+        each fpr
+    output:
+        val(outdir, emit: outdir)
+        path("plots/*.png") optional true
+
+    script:
+"""
+ls -ltra > objects.txt
+"""
+}
+//python 037-plot_cellranger_vs_cellbender.py \
+//    --samplename "$samplename" \
+//    --raw_cellranger_mtx "$raw_cellranger_mtx" \
+//    --filtered_cellranger_mtx "$filtered_cellranger_mtx" \
+//    --cellbender_unfiltered_h5 "$cellbender_unfiltered_h5" \
+//    --fpr "$fpr" \
+//    --n_expected_cells "$n_expected_cells" \
+//    --n_total_droplets_included "$n_total_droplets_included" \
+//    --out_dir \$PWD
+
+// samplename=Pilot_study_of_dissociation_methods_for_human_gut_tissues8024875
+// raw_cellranger_mtx=/lustre/scratch123/hgi/projects/ukbb_scrna/pipelines/Pilot_UKB/fetch/wbc_mult_donor/results/iget_study_cellranger/5631/Pilot_study_of_dissociation_methods_for_human_gut_tissues8024875/cellranger_Pilot_study_of_dissociation_methods_for_human_gut_tissues8024875/raw_feature_bc_matrix
+// filtered_cellranger_mtx=/lustre/scratch123/hgi/projects/ukbb_scrna/pipelines/Pilot_UKB/fetch/wbc_mult_donor/results/iget_study_cellranger/5631/Pilot_study_of_dissociation_methods_for_human_gut_tissues8024875/cellranger_Pilot_study_of_dissociation_methods_for_human_gut_tissues8024875/filtered_feature_bc_matrix
+// cellbender_unfiltered_h5=cellbender_FPR_0pt01_unfiltered.h5
+// fpr=0.01
+// n_expected_cells=$(cat umi_count_estimates-expected_cells.txt)
+// n_total_droplets_included=$(cat umi_count_estimates-total_droplets_included.txt)
+
 
 
 process cellbender__gather_qc_input {

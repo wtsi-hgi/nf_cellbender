@@ -10,6 +10,7 @@ include {
     cellbender__rb__get_input_cells;
     cellbender__remove_background;
     cellbender__remove_background__qc_plots;
+    cellbender__remove_background__qc_plots_2;
     cellbender__gather_qc_input;
 } from "./modules/core.nf"
 
@@ -132,6 +133,12 @@ workflow {
         cellbender__remove_background__qc_plots(
             cellbender__remove_background.out.cb_plot_input
         )
+
+        cellbender__remove_background__qc_plots_2(
+	  params.cellbender_rb.fpr.value
+          cellbender__remove_background.out.cb_plot_input
+        )
+    
         // Bring all of the QC metrics together
         // Group by the second output which is the tuple
         // This code assumes tuple[0] = outdir
