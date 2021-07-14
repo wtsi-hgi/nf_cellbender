@@ -134,10 +134,47 @@ workflow {
             cellbender__remove_background.out.cb_plot_input
         )
 
-        cellbender__remove_background__qc_plots_2(
-	  params.cellbender_rb.fpr.value
-          cellbender__remove_background.out.cb_plot_input
-        )
+    if (params.cellbender__remove_background__qc_plots_2.run_task) {
+	log.info "params.cellbender__remove_background__qc_plots_2.run_task is set to true"
+	
+	if (params.cellbender__remove_background__qc_plots_2.file_paths_cellranger_filtered_10x) {
+	    if (! file("${params.cellbender__remove_background__qc_plots_2.file_paths_cellranger_filtered_10x}").isEmpty()) {    
+		log.info "params.cellbender__remove_background__qc_plots_2.file_paths_cellranger_filtered_10x is set to file path ${params.cellbender__remove_background__qc_plots_2.file_paths_cellranger_filtered_10x}"
+		log.info "will run 'cellbender__remove_background__qc_plots_2' Nextflow task"
+		
+		// read in tab-delimited table
+		//     params.file_paths_10x
+		// columns 'experiment_id' and  'data_path_10x_format'
+		// where 'data_path_10x_format' is raw cellranger dir .../raw_feature_bc_matrix
+		ch_experimentid_paths10x_raw = Channel
+		    .fromPath(params.file_paths_10x)
+		    .splitCsv(header: true, sep: "\t", by: 1)
+		    .map{row -> tuple(row.experiment_id, file(row.data_path_10x_format))}
+
+		// read in tab-delimited table
+		//     params.cellbender__remove_background__qc_plots_2.file_paths_cellranger_filtered_10x
+		// columns 'experiment_id' and  'data_path_10x_format'
+		// where 'data_path_10x_format' is filtered cellranger dir .../filtered_feature_bc_matrix
+		ch_experimentid_paths10x_filtered = Channel
+		    .fromPath(params.cellbender__remove_background__qc_plots_2.file_paths_cellranger_filtered_10x)
+		    .splitCsv(header: true, sep: "\t", by: 1)
+		    .map{row -> tuple(row.experiment_id, file(row.data_path_10x_format))}
+		
+		cellbender__remove_background.out.experimentid_outdir_cellbenderunfiltered_expectedcells_totaldropletsinclude.
+		combine(ch_experimentid_paths10x_raw, by: 0).
+		combine(ch_experimentid_paths10x_filtered, by: 0).
+		set{input_channel_qc_plots_2}
+		
+		input_channel_qc_plots_2.view()
+		
+		cellbender__remove_background__qc_plots_2(
+		    input_channel_qc_plots_2,
+		    params.cellbender_rb.fpr.value)
+	    } else {
+		log.info "input parameter params.cellbender__remove_background__qc_plots_2.file_paths_cellranger_filtered_10x must be set to path to tsv file"
+	    }
+        }
+    }
     
         // Bring all of the QC metrics together
         // Group by the second output which is the tuple

@@ -210,6 +210,14 @@ process cellbender__remove_background {
         path(file_10x_matrix, emit: raw_tenx_matrix)
         path("plots/*.png") optional true
         path("plots/*.pdf") optional true
+        tuple(
+            val(experiment_id),
+            val(outdir),
+            path("*_unfiltered.h5"),
+            path(expected_cells),
+            path(total_droplets_include),
+            emit: experimentid_outdir_cellbenderunfiltered_expectedcells_totaldropletsinclude
+        )
 
     script:
         runid = random_hex(16)
@@ -358,44 +366,45 @@ process cellbender__remove_background__qc_plots {
 }
 
 process cellbender__remove_background__qc_plots_2 {
-    // second set of QC plots from cellbdender
+    // Second set of QC plots from cellbdender.
+    // This task compare the cellbender output with both the cellranger filtered and cellragner raw outputs
     // ------------------------------------------------------------------------
-    //tag { output_dir }
+    tag { "$experiment_id" }
+    publishDir "${params.outdir}/compare_cellranger/", mode: 'copy', pattern: "", overwrite: true 
     //cache false        // cache results from run
     //maxForks 2         // hard to control memory usage. limit to 3 concurrent
     scratch false        // use tmp directory
     echo echo_mode       // echo output from script
     input:
-        val(outdir_prev)
-        path(cellbender_FPR_0ptnn_unfiltered_h5s) // e.g. _0pt1, _0pt05, _0pt01
+        tuple val(experiment_id), val(outdir), path(cellbender_unfiltered_h5s), path(expectedcells), path(totaldropletsinclude), path(raw_cellranger_mtx), path(filtered_cellranger_mtx)
         each fpr
     output:
         val(outdir, emit: outdir)
-        path("plots/*.png") optional true
+        path("fpr_${fpr}/${experiment_id}/*.png"), emit: plots_png 
 
     script:
 """
-ls -ltra > objects.txt
+fprid=\$(echo $fpr | sed s'/\\./pt/'g)
+cellbender_unfiltered_h5=cellbender_FPR_\${fprid}_unfiltered.h5
+
+echo fpr $fpr
+echo fprid \$fprid
+echo cellbender_unfiltered_h5 \$cellbender_unfiltered_h5
+
+n_expected_cells=\$(cat $expectedcells)
+n_total_droplets_included=\$(cat $totaldropletsinclude)
+
+python 037-plot_cellranger_vs_cellbender.py \\
+    --samplename \"${experiment_id}\" \\
+    --raw_cellranger_mtx \"${raw_cellranger_mtx}\" \\
+    --filtered_cellranger_mtx \"${filtered_cellranger_mtx}\" \\
+    --cellbender_unfiltered_h5 \"\$cellbender_unfiltered_h5\" \\
+    --fpr \"${fpr}\" \\
+    --n_expected_cells \"${n_expected_cells}\" \\
+    --n_total_droplets_included \"${n_total_droplets_included}\" \\
+    --out_dir \$PWD
 """
 }
-//python 037-plot_cellranger_vs_cellbender.py \
-//    --samplename "$samplename" \
-//    --raw_cellranger_mtx "$raw_cellranger_mtx" \
-//    --filtered_cellranger_mtx "$filtered_cellranger_mtx" \
-//    --cellbender_unfiltered_h5 "$cellbender_unfiltered_h5" \
-//    --fpr "$fpr" \
-//    --n_expected_cells "$n_expected_cells" \
-//    --n_total_droplets_included "$n_total_droplets_included" \
-//    --out_dir \$PWD
-
-// samplename=Pilot_study_of_dissociation_methods_for_human_gut_tissues8024875
-// raw_cellranger_mtx=/lustre/scratch123/hgi/projects/ukbb_scrna/pipelines/Pilot_UKB/fetch/wbc_mult_donor/results/iget_study_cellranger/5631/Pilot_study_of_dissociation_methods_for_human_gut_tissues8024875/cellranger_Pilot_study_of_dissociation_methods_for_human_gut_tissues8024875/raw_feature_bc_matrix
-// filtered_cellranger_mtx=/lustre/scratch123/hgi/projects/ukbb_scrna/pipelines/Pilot_UKB/fetch/wbc_mult_donor/results/iget_study_cellranger/5631/Pilot_study_of_dissociation_methods_for_human_gut_tissues8024875/cellranger_Pilot_study_of_dissociation_methods_for_human_gut_tissues8024875/filtered_feature_bc_matrix
-// cellbender_unfiltered_h5=cellbender_FPR_0pt01_unfiltered.h5
-// fpr=0.01
-// n_expected_cells=$(cat umi_count_estimates-expected_cells.txt)
-// n_total_droplets_included=$(cat umi_count_estimates-total_droplets_included.txt)
-
 
 
 process cellbender__gather_qc_input {
