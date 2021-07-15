@@ -72,7 +72,7 @@ process cellbender__rb__get_input_cells {
 
     script:
         runid = random_hex(16)
-        outdir = "${outdir_prev}/cellbender_results/${experiment_id}"
+        outdir = "${outdir_prev}/${experiment_id}"
         outdir = "${outdir}/cellbender-estimate_ncells_nemptydroplets"
         outfile = "umi_count_estimates"
         cmd__expected_ncells = ""
@@ -221,7 +221,7 @@ process cellbender__remove_background {
 
     script:
         runid = random_hex(16)
-        outdir = "${outdir_prev}/cellbender_results/${experiment_id}"
+        outdir = "${outdir_prev}/${experiment_id}"
         lr_string = "${learning_rate}".replaceAll("\\.", "pt")
         lr_string = "${lr_string}".replaceAll("-", "neg")
         fpr_string = "${fpr}".replaceAll("\\.", "pt").replaceAll(" ", "_")
@@ -370,7 +370,13 @@ process cellbender__remove_background__qc_plots_2 {
     // This task compare the cellbender output with both the cellranger filtered and cellragner raw outputs
     // ------------------------------------------------------------------------
     tag { "$experiment_id" }
-    publishDir "${params.outdir}/compare_cellranger/", mode: 'copy', pattern: "", overwrite: true 
+    publishDir "${params.output_dir}/$experiment_id/compare_cellranger/", pattern: "fpr_${fpr}/${experiment_id}/*.png", 
+        saveAs: {filename ->
+        filename.replaceAll("fpr_${fpr}/${experiment_id}/", "fpr_${fpr}/")
+    },
+        mode: "${task.publish_mode}",
+        overwrite: "true"
+    
     //cache false        // cache results from run
     //maxForks 2         // hard to control memory usage. limit to 3 concurrent
     scratch false        // use tmp directory
@@ -395,7 +401,7 @@ echo n_expected_cells \${n_expected_cells}
 n_total_droplets_included=\$(cat $totaldropletsinclude)
 echo n_total_droplets_included \${n_total_droplets_included}
 
-python ${projectDir}/../037-plot_cellranger_vs_cellbender.py \\
+python ${projectDir}/bin/037-plot_cellranger_vs_cellbender.py \\
     --samplename \"${experiment_id}\" \\
     --raw_cellranger_mtx \"${raw_cellranger_mtx}\" \\
     --filtered_cellranger_mtx \"${filtered_cellranger_mtx}\" \\
