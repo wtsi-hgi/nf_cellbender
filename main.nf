@@ -110,6 +110,7 @@ channel__file_paths_10x = Channel
 // Run the workflow.
 workflow {
     main:
+
         // Prep the data for cellbender
         // This is silly, but to get the ouput directory structure that we
         // want, I need to pass all of the cellbender params here
@@ -160,16 +161,17 @@ workflow {
 		    .splitCsv(header: true, sep: "\t", by: 1)
 		    .map{row -> tuple(row.experiment_id, file(row.data_path_10x_format))}
 		
-		cellbender__remove_background.out.experimentid_outdir_cellbenderunfiltered_expectedcells_totaldropletsinclude.
-		combine(ch_experimentid_paths10x_raw, by: 0).
-		combine(ch_experimentid_paths10x_filtered, by: 0).
-		set{input_channel_qc_plots_2}
+		cellbender__remove_background.out.experimentid_outdir_cellbenderunfiltered_expectedcells_totaldropletsinclude
+		    .combine(ch_experimentid_paths10x_raw, by: 0)
+		    .combine(ch_experimentid_paths10x_filtered, by: 0)
+		    .combine(Channel.from("${params.cellbender_rb.fpr.value}"
+					  .replaceFirst(/]$/,"")
+					  .replaceFirst(/^\[/,"")
+					  .split()))
+		    .set{input_channel_qc_plots_2}
 		
-		input_channel_qc_plots_2.view()
+		cellbender__remove_background__qc_plots_2(input_channel_qc_plots_2)
 		
-		cellbender__remove_background__qc_plots_2(
-		    input_channel_qc_plots_2,
-		    params.cellbender_rb.fpr.value)
 	    } else {
 		log.info "input parameter params.cellbender__remove_background__qc_plots_2.file_paths_cellranger_filtered_10x must be set to path to tsv file"
 	    }

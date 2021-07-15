@@ -376,8 +376,7 @@ process cellbender__remove_background__qc_plots_2 {
     scratch false        // use tmp directory
     echo echo_mode       // echo output from script
     input:
-        tuple val(experiment_id), val(outdir), path(cellbender_unfiltered_h5s), path(expectedcells), path(totaldropletsinclude), path(raw_cellranger_mtx), path(filtered_cellranger_mtx)
-        each fpr
+        tuple val(experiment_id), val(outdir), path(cellbender_unfiltered_h5s), path(expectedcells), path(totaldropletsinclude), path(raw_cellranger_mtx), path(filtered_cellranger_mtx), val(fpr)
     output:
         val(outdir, emit: outdir)
         path("fpr_${fpr}/${experiment_id}/*.png"), emit: plots_png 
@@ -392,16 +391,18 @@ echo fprid \$fprid
 echo cellbender_unfiltered_h5 \$cellbender_unfiltered_h5
 
 n_expected_cells=\$(cat $expectedcells)
+echo n_expected_cells \${n_expected_cells}
 n_total_droplets_included=\$(cat $totaldropletsinclude)
+echo n_total_droplets_included \${n_total_droplets_included}
 
-python 037-plot_cellranger_vs_cellbender.py \\
+python ${projectDir}/../037-plot_cellranger_vs_cellbender.py \\
     --samplename \"${experiment_id}\" \\
     --raw_cellranger_mtx \"${raw_cellranger_mtx}\" \\
     --filtered_cellranger_mtx \"${filtered_cellranger_mtx}\" \\
     --cellbender_unfiltered_h5 \"\$cellbender_unfiltered_h5\" \\
     --fpr \"${fpr}\" \\
-    --n_expected_cells \"${n_expected_cells}\" \\
-    --n_total_droplets_included \"${n_total_droplets_included}\" \\
+    --n_expected_cells \"\${n_expected_cells}\" \\
+    --n_total_droplets_included \"\${n_total_droplets_included}\" \\
     --out_dir \$PWD
 """
 }
