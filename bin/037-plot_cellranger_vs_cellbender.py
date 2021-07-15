@@ -184,7 +184,7 @@ def plot_cellranger_vs_cellbender(samplename, raw_cellranger_mtx, filtered_cellr
         + labs(x='Barcodes (ordered by descending cell total couts)',color='Cellbender input',
                y='Cell total counts', title='Cells filtered out by Cellranger or Cellbender') \
         + scale_y_continuous(trans='log10',minor_breaks=0) + scale_x_continuous(trans='log10',minor_breaks=0)
-    gplt.save(out_dir + '/' + samplename + '/barcode_vs_total_counts.png', width=12,height=5) # dpi=300,
+    gplt.save(out_dir + '/' + samplename + '/barcode_vs_total_counts.png', width=12,height=5, dpi=300) # dpi=300,
 
 
 
@@ -212,7 +212,7 @@ def plot_cellranger_vs_cellbender(samplename, raw_cellranger_mtx, filtered_cellr
         + theme(axis_text_x=element_blank()) \
         + scale_y_continuous(trans='log10',minor_breaks=0) \
         + labs(color='n cells in intersection of datasets', x='', y='Cell total counts', title='Total cell counts compared across datasets (facets)')
-    gplt.save(out_dir + '/' + samplename + '/boxplots_cellranger_vs_cellbender.png', width=12,height=5) # dpi=300,
+    gplt.save(out_dir + '/' + samplename + '/boxplots_cellranger_vs_cellbender.png', width=12,height=5, dpi=300) # dpi=300,
 
 
     # plot difference cellbender filtered vs cellranger filtered for common cells between the 2 datasets
@@ -297,10 +297,10 @@ def plot_cellranger_vs_cellbender(samplename, raw_cellranger_mtx, filtered_cellr
     gplt = ggplot(df_merged, aes(x='gene_symbol',y='count')) \
         + geom_boxplot() \
         + theme_bw() \
-        + theme(axis_text_x = element_text(angle = 90, hjust = 1, size= 1)) \
+        + theme(axis_text_x = element_text(angle = 90, hjust = 1, size= 6)) \
         + facet_wrap('dataset', scales = 'free', ncol = 1) \
         + labs(x='Genes (top 100 Genes most different between Cellranger Filtered counts and Cellbender filtered counts)', y='Cell total counts', title='Total cell counts compared across most different genes (x-axis) and datasets (facets)')
-    gplt.save(out_dir + '/' + samplename + '/boxplot_topgenes_cellranger_vs_cellbender.png', width=10,height=20) # dpi=300,
+    gplt.save(out_dir + '/' + samplename + '/boxplot_topgenes_cellranger_vs_cellbender.png', width=10,height=20, dpi=300) # dpi=300,
     logging.info('script done.')
 
 
