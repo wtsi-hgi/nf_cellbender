@@ -1,0 +1,103 @@
+cellbender_rb:
+    description: 'Parameters for cellbender remove background.'
+    estimate_params_umis:
+        description: '
+            Cellbender requires two parameters:
+                (1) expected-cells
+                (2) total-droplets-included
+            Expected number of cells: expected a priori from the experimental
+                design or based on the UMI curve at a point where one is
+                reasonably sure that all droplets to the left on the UMI
+                curve are real cells.
+            Total droplets included: emtpy droplets. Point on the UMI curve
+                where every droplet to the right of this number on
+                the UMI curve should be surely empty.
+            There are several ways to provide these parameters to this
+            workflow:
+                (1) In the file_paths_10x.tsv file under the ncells_expected
+                    ndroplets_include_cellbender columns
+                (2) Estimate both parameters via the
+                    get_estimates_from_umi_counts.py script.
+            get_estimates_from_umi_counts.py options for # of cells:
+                (1) method_estimate_ncells: method used to estimate knee or
+                    inflection point on UMI plot.
+                (2) lower_bound_umis_estimate_ncells: remove cells with UMIs
+                    below this bound before estimating the knee/inflection.
+            get_estimates_from_umi_counts.py options for # of empty droplets:
+                (1) method_estimate_ncells: method used to estimate knee or
+                    inflection point on UMI plot.
+                (2) lower_bound_umis_estimate_ncells: remove cells with UMIs
+                    below this bound before estimating the knee/inflection.
+                (3) upper_bound_umis_estimate_ncells: remove cells with UMIs
+                    above this bound before estimating the knee/inflection.
+                (4) estimate_nemptydroplets_umi_add_factor: after
+                    identifying an inflection point add this number to
+                    the umi counts to get the final cutoff point,
+                (5) expected_nemptydroplets_umi_cutoff: set the empty droplet
+                    value using this umi cutoff.
+                (6) estimate_nemptydroplets_min_drop: if the estimated droplet
+                    cutoff is < this value, then set it to this value.
+                (7) estimate_nemptydroplets_subtract_cell_factor: subtract this
+                    number from the total number of cell estimates.
+            If exact number per sample is provided in file_paths_10x.tsv via
+            the ndroplets_include_cellbender column, then estimates are not
+            performed and this parameter does nothing.
+            NOTE: Setting this parameter will likely vary according
+                tissue / dataset - evaluate the UMI count plots across the
+                full dataset before setting.
+            WARNING: Do not attempt to iterate over many parameters here as
+                these settings are not recorded in the output dir.
+            '
+        value:
+            expected_nemptydroplets_umi_cutoff: 0
+            method_estimate_ncells: 'dropletutils::barcoderanks::inflection'
+            lower_bound_umis_estimate_ncells: 1000
+            method_estimate_nemptydroplets: 'dropletutils::barcoderanks::inflection,dropletutils::barcoderanks::knee,0.33'
+            lower_bound_umis_estimate_nemptydroplets: 10
+            upper_bound_umis_estimate_nemptydroplets: 250
+            estimate_nemptydroplets_umi_add_factor: 0
+            estimate_nemptydroplets_subtract_cell_factor: 0
+            estimate_nemptydroplets_min_drop: 0
+    epochs:
+        description: 'CellBender parameter. Number of epochs for training.
+            CellBender default is 150.'
+        value:
+            - 250
+    learning_rate:
+        description: 'CellBender parameter. Learning rate. If lower learning
+            rate, may need to increase the number of epochs.
+            CellBender default is 0.0001.'
+        value:
+            - 0.0000001
+    zdim:
+        description: 'Dimension of latent variable z, in v2 this parameter
+            influences the prior on cell counts.
+            https://github.com/broadinstitute/CellBender/issues/42
+            CellBender default is 100.'
+        value:
+            - 100
+    zlayers:
+        description: 'Dimension of hidden layers in the encoder for z.
+            CellBender default is 500.'
+        value:
+            - 500
+    low_count_threshold:
+        description: 'Droplets with UMI counts below this number are completely
+            excluded from the analysis. This can help identify the correct
+            prior for empty droplet counts in the rare case where empty
+            counts are extremely high (over 200).
+            CellBender default is 15.'
+        value:
+            - 10
+    fpr:
+        description: 'CellBender parameter. A value of 0.01 is generally
+            quite good, but you can generate a few output count matrices
+            and compare them by choosing a few values: 0.01 0.05 0.1.
+            Target false positive rate in (0, 1). A false positive is a true
+            signal count that is erroneously removed. More background removal
+            is accompanied by more signal removal at high values of FPR.
+            You can specify multiple values, which will create multiple
+            output files.
+            CellBender default is 0.01.'
+        value:
+            - "0.01 0.05 0.1"
